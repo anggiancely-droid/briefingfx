@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Himawari-9 Satellite | Aviation Weather Briefing System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+
+        /* Transisi Header Scroll Naik Turun */
+        .smart-header {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .header-hidden {
+            transform: translateY(-100%);
+        }
+
+        /* --- Tombol Navigasi Lebih Besar, Megah & Unik --- */
+        .nav-item {
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px solid #cbd5e1;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #1e293b;
+            font-weight: 800;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            white-space: nowrap;
+        }
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.15), transparent);
+            transition: 0.5s;
+        }
+        .nav-item:hover::before {
+            left: 100%;
+        }
+        .nav-item:hover { 
+            transform: translateY(-4px) scale(1.02); 
+            border-color: #2563eb; 
+            color: #1d4ed8; 
+            box-shadow: 0 14px 25px -6px rgba(37, 99, 235, 0.25); 
+        }
+        
+        /* Navigasi Aktif */
+        .active-nav {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb) !important;
+            color: #ffffff !important;
+            box-shadow: 0 12px 25px -5px rgba(30, 58, 138, 0.45) !important;
+            border-color: #1d4ed8 !important;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinning {
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Wadah Gambar Konsisten Sesuai Format wind300.html */
+        .image-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            background: #ffffff;
+            border-radius: 1rem;
+            overflow: hidden;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            border-radius: 0.5rem;
+        }
+
+        /* --- BACKGROUND PALING LUAR: GAMBAR AWAN --- */
+        body {
+            background-image: linear-gradient(to bottom, rgba(240, 248, 255, 0.85), rgba(224, 242, 254, 0.85)), url('gambar/awan.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 min-h-screen antialiased flex flex-col pt-6">
+
+    <!-- HEADER / NAVBAR DENGAN FITUR AUTO-HIDE KETIKA SCROLL -->
+    <header id="main-header" class="smart-header bg-white/95 backdrop-blur-md border-b-2 border-slate-200 fixed top-0 left-0 right-0 z-50 shadow-md">
+        
+        <!-- Baris Atas: Identitas & Jam UTC -->
+<div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white px-6 lg:px-10 py-3 flex flex-col md:flex-row items-center justify-between text-xs font-mono-code border-b border-blue-900/50 shadow-inner gap-3">
+    
+    <!-- Bagian Kiri: Perusahaan & Prodi -->
+    <div class="flex flex-col sm:flex-row items-center sm:items-start md:items-center gap-2 sm:gap-3 text-center sm:text-left">
+        <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-rose-500 animate-ping shrink-0"></span>
+            <span class="font-bold text-white tracking-wider">PT DIRGANTARA INDONESIA (PERSERO)</span>
+        </div>
+        <span class="text-slate-500 hidden sm:inline">|</span>
+        <div class="flex items-center gap-2">
+            <span class="text-slate-400">Flight Test Operations Department - FT2000</span>
+            <span class="text-slate-500 hidden md:inline">|</span>
+            <span class="bg-sky-500/20 text-sky-300 px-2.5 py-0.5 rounded-md border border-sky-500/30 font-semibold tracking-wide">
+                Prodi Meteorologi ITB
+            </span>
+        </div>
+    </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-slate-300 font-bold">
+                    <span class="text-slate-400 text-[10px] uppercase">Date:</span>
+                    <span id="current-date" class="text-white">-</span>
+                </div>
+                <div class="h-4 w-[1px] bg-slate-700"></div>
+                <div class="flex items-center gap-2 bg-rose-950/80 px-3.5 py-1 rounded-xl border border-rose-500/40 shadow-md">
+                    <span class="text-rose-300 text-[10px] font-bold">UTC:</span>
+                    <span id="utc-clock" class="text-rose-400 font-mono-code font-extrabold text-sm tracking-wider drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]">00:00:00 UTC</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Baris Utama Header: Logo Kolaborasi, Judul & Running Text / Tombol Export -->
+        <div class="max-w-[95rem] mx-auto px-6 lg:px-10 py-4 flex flex-col xl:flex-row items-center justify-between gap-6">
+            
+            <div class="flex flex-col lg:flex-row items-center gap-6 w-full xl:w-auto text-center lg:text-left">
+                <!-- LOGO KOLABORASI (PTDI, BMKG, ITB) -->
+                <div class="flex items-center gap-3 bg-slate-100 p-2 rounded-2xl border border-slate-200 shadow-inner shrink-0">
+                    <img src="gambar/logo ptdi.webp" alt="Logo PTDI" class="h-9 w-auto object-contain hover:scale-105 transition-transform" title="PT Dirgantara Indonesia">
+                    <div class="h-7 w-[1px] bg-slate-300"></div>
+                    <img src="gambar/logo bmkg.jpg" alt="Logo BMKG" class="h-9 w-auto object-contain hover:scale-105 transition-transform" title="BMKG">
+                    <div class="h-7 w-[1px] bg-slate-300"></div>
+                    <img src="gambar/logo itb.webp" alt="Logo ITB" class="h-9 w-auto object-contain hover:scale-105 transition-transform" title="Institut Teknologi Bandung">
+                </div>
+
+                <div>
+                    <h1 class="font-heading text-xl lg:text-2xl font-black text-slate-900 uppercase tracking-tight">Himawari-9 Satellite Monitoring</h1>
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-1">
+                        <span class="text-xs font-mono-code text-blue-700 font-extrabold tracking-widest uppercase bg-blue-50 px-3 py-0.5 rounded-md border border-blue-200">Enhanced Infrared Indonesia Database</span>
+                        <span class="text-xs font-mono-code text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">● Live Operational</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Running Text & Tombol Export -->
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
+                <div class="flex-1 w-full sm:w-[380px] bg-sky-50/80 border-2 border-sky-200 rounded-2xl overflow-hidden py-2 px-3 shadow-inner relative flex items-center">
+                    <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider mr-2 shrink-0 z-10 shadow-sm">Info</span>
+                    <div class="overflow-hidden whitespace-nowrap w-full">
+                        <marquee behavior="scroll" direction="left" scrollamount="5" class="text-xs font-semibold text-slate-700">
+                            🛰️ Citra Satelit Himawari-9 (Enhanced Infrared Indonesia) diperbarui secara real-time langsung dari server BMKG untuk pemantauan sebaran awan konvektif.
+                        </marquee>
+                    </div>
+                </div>
+
+                <div class="shrink-0 w-full sm:w-auto flex justify-end no-print">
+                    <button onclick="exportToPDF()" class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-6 py-3 rounded-2xl transition-all flex items-center justify-center gap-2.5 text-xs shadow-lg shadow-blue-500/25 border border-blue-500/30 hover:scale-105">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>Export PDF Briefing</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Navigasi Bawah Header -->
+        <div class="bg-slate-100/95 backdrop-blur-md border-t border-slate-200 px-6 lg:px-10 py-4 no-print">
+            <div class="max-w-[95rem] mx-auto flex overflow-x-auto gap-4 no-scrollbar items-center py-1">
+                <a href="index.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center text-lg shadow-inner">🏠</span> Beranda
+                </a>
+                <a href="metar.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-amber-100/80 flex items-center justify-center text-lg shadow-sm">🌤️</span> METAR / TAF Reports
+                </a>
+                <a href="satelit.html" class="nav-item active-nav whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-100/80 flex items-center justify-center text-lg shadow-sm">🛰️</span> Himawari-9 Satellite
+                </a>
+                <a href="hazard.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-rose-100/80 flex items-center justify-center text-lg shadow-sm">🗺️</span> Upper Air Analysis
+                </a>
+                <a href="wind3000.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-emerald-100/80 flex items-center justify-center text-lg shadow-sm">💨</span> Streamline 3000 Ft
+                </a>
+                <a href="charts.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-blue-100/80 flex items-center justify-center text-lg shadow-sm">📈</span> Wind/Temp
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- KONTEN UTAMA SATELLITE -->
+    <main class="flex-1 p-6 lg:p-14 max-w-[95rem] mx-auto w-full space-y-12 mt-56">
+        <div class="bg-white/95 backdrop-blur p-8 lg:p-16 rounded-[2.5rem] border-2 border-slate-200/80 shadow-2xl space-y-8 pb-16">
+            
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between pb-6 border-b-2 border-slate-200 gap-4">
+                <div>
+                    <h2 class="font-heading text-2xl lg:text-4xl font-black text-slate-900 uppercase tracking-tight">Himawari-9 Satellite Imagery</h2>
+                    <p class="text-sm text-slate-600 mt-1">Pengamatan citra satelit inframerah (Enhanced Infrared) wilayah Indonesia untuk identifikasi pertumbuhan awan konvektif dan badai.</p>
+                </div>
+                
+                <!-- Tombol Refresh -->
+                <div class="no-print">
+                    <button onclick="refreshSatelliteImage()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-3 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all border border-indigo-700">
+                        <svg id="refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <span>Refresh Image</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAMPILAN GAMBAR UTAMA DI LAYAR -->
+            <div class="flex justify-center">
+                <div class="border-2 border-indigo-300 p-5 lg:p-6 rounded-3xl bg-gradient-to-br from-indigo-50/80 to-blue-50/50 shadow-md space-y-3 w-full max-w-[800px]">
+                    <div class="flex justify-between items-center pb-2 border-b-2 border-indigo-200 gap-6">
+                        <span class="font-mono-code font-extrabold text-[11px] text-indigo-900 uppercase tracking-wider">Himawari-9 Enhanced Infrared (Indonesia)</span>
+                        <span id="display-mode-tag" class="text-[10px] bg-emerald-600 text-white px-3.5 py-0.5 rounded-xl font-extrabold shadow-sm">LIVE OPERATIONAL</span>
+                    </div>
+                    
+                    <div class="image-container border-2 border-indigo-200 shadow-inner">
+                        <img id="img-satelite" src="" alt="Citra Satelit Himawari-9 BMKG" crossorigin="anonymous">
+                    </div>
+                    <p class="text-[11px] text-slate-500 italic font-medium font-mono-code text-center">* Enhanced Infrared Himawari-9 Satellite Imagery sourced directly from BMKG server.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- SCRIPT UTAMA -->
+    <script>
+        // Jam UTC Real-time di Header
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('utc-clock').innerText = now.toUTCString().slice(17, 25) + " UTC";
+        }, 1000);
+
+        // Format Tanggal Indonesia
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', options);
+
+        // Fungsi Memuat/Memperbarui Gambar Satelit Manual & Menyimpan ke localStorage untuk Ekspor PDF
+        function refreshSatelliteImage() {
+            const imgElement = document.getElementById('img-satelite');
+            const iconElement = document.getElementById('refresh-icon');
+
+            // Tambahkan animasi putar pada ikon saat diklik
+            if(iconElement) iconElement.classList.add('spinning');
+
+            // Tambahkan parameter waktu unik (timestamp) agar gambar memperbarui cache
+            const ts = new Date().getTime();
+            const satUrl = "https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_EH_Indonesia.png";
+            const safeUrl = `https://wsrv.nl/?url=${encodeURIComponent(satUrl)}&t=${ts}`;
+            
+            imgElement.src = safeUrl;
+
+            // Simpan format HTML card ke localStorage agar siap jika diekspor ke PDF
+            const now = new Date();
+            const timeString = now.toTimeString().slice(0, 8) + " UTC (" + now.toLocaleDateString('id-ID', options) + ")";
+            const satelliteHtmlCard = `
+                <div class="border-2 border-indigo-300 p-6 rounded-3xl bg-slate-950 flex flex-col items-center space-y-4 page-break avoid-break">
+                    <span class="text-xs font-mono-code text-indigo-300 font-extrabold uppercase">Himawari-9 Satellite Imagery (Enhanced Infrared) — ${timeString}</span>
+                    <img src="${safeUrl}" alt="Himawari-9 Satellite" class="w-full max-w-3xl h-auto object-contain rounded-xl border border-slate-800 shadow-xl bg-black" crossorigin="anonymous">
+                </div>
+            `;
+            localStorage.setItem('briefing_satellite_data', satelliteHtmlCard);
+
+            // Hentikan animasi putar setelah 0.8 detik
+            setTimeout(() => {
+                if(iconElement) iconElement.classList.remove('spinning');
+            }, 800);
+        }
+
+        // Inisialisasi pertama kali saat halaman dibuka
+        window.onload = function() {
+            refreshSatelliteImage();
+        };
+
+        function exportToPDF() {
+            window.location.href = 'print.html';
+        }
+
+        let lastScrollTop = 0;
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                header.classList.add('header-hidden');
+            } else {
+                header.classList.remove('header-hidden');
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
+    </script>
+</body>
+</html>

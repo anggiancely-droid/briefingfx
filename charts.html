@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upper Air Charts | Aviation Weather Briefing System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+
+        /* Transisi Header Scroll Naik Turun */
+        .smart-header {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .header-hidden {
+            transform: translateY(-100%);
+        }
+
+        /* --- Tombol Navigasi Lebih Besar, Megah & Unik --- */
+        .nav-item {
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px solid #cbd5e1;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #1e293b;
+            font-weight: 800;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            white-space: nowrap;
+        }
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.15), transparent);
+            transition: 0.5s;
+        }
+        .nav-item:hover::before {
+            left: 100%;
+        }
+        .nav-item:hover { 
+            transform: translateY(-4px) scale(1.02); 
+            border-color: #2563eb; 
+            color: #1d4ed8; 
+            box-shadow: 0 14px 25px -6px rgba(37, 99, 235, 0.25); 
+        }
+        
+        /* Navigasi Aktif */
+        .active-nav {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb) !important;
+            color: #ffffff !important;
+            box-shadow: 0 12px 25px -5px rgba(30, 58, 138, 0.45) !important;
+            border-color: #1d4ed8 !important;
+            transform: translateY(-2px);
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+        }
+
+        /* Efek klik responsif agar tombol terasa nyata diklik */
+        .btn-interactive:active {
+            transform: scale(0.96);
+        }
+
+        /* --- BACKGROUND PALING LUAR: GAMBAR AWAN --- */
+        body {
+            background-image: linear-gradient(to bottom, rgba(240, 248, 255, 0.85), rgba(224, 242, 254, 0.85)), url('gambar/awan.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="text-slate-900 min-h-screen antialiased flex flex-col pt-6">
+
+    <!-- HEADER / NAVBAR DENGAN FITUR AUTO-HIDE KETIKA SCROLL -->
+    <header id="main-header" class="smart-header bg-white/95 backdrop-blur-md border-b-2 border-slate-200 fixed top-0 left-0 right-0 z-50 shadow-md">
+        
+        <!-- Baris Atas: Identitas & Jam UTC -->
+<!-- Baris Atas: Identitas, Departemen & Prodi Meteorologi ITB -->
+<div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white px-6 lg:px-10 py-3 flex flex-col md:flex-row items-center justify-between text-xs font-mono-code border-b border-blue-900/50 shadow-inner gap-3">
+    
+    <!-- Bagian Kiri: Perusahaan & Prodi -->
+    <div class="flex flex-col sm:flex-row items-center sm:items-start md:items-center gap-2 sm:gap-3 text-center sm:text-left">
+        <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-rose-500 animate-ping shrink-0"></span>
+            <span class="font-bold text-white tracking-wider">PT DIRGANTARA INDONESIA (PERSERO)</span>
+        </div>
+        <span class="text-slate-500 hidden sm:inline">|</span>
+        <div class="flex items-center gap-2">
+            <span class="text-slate-400">Flight Test Operations Department - FT2000</span>
+            <span class="text-slate-500 hidden md:inline">|</span>
+            <span class="bg-sky-500/20 text-sky-300 px-2.5 py-0.5 rounded-md border border-sky-500/30 font-semibold tracking-wide">
+                Prodi Meteorologi ITB
+            </span>
+        </div>
+    </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-slate-300 font-bold">
+                    <span class="text-slate-400 text-[10px] uppercase">Date:</span>
+                    <span id="current-date" class="text-white">-</span>
+                </div>
+                <div class="h-4 w-[1px] bg-slate-700"></div>
+                <div class="flex items-center gap-2 bg-rose-950/80 px-3.5 py-1 rounded-xl border border-rose-500/40 shadow-md">
+                    <span class="text-rose-300 text-[10px] font-bold">UTC:</span>
+                    <span id="utc-clock" class="text-rose-400 font-mono-code font-extrabold text-sm tracking-wider drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]">00:00:00 UTC</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Baris Utama Header -->
+        <div class="max-w-[95rem] mx-auto px-6 lg:px-10 py-4 flex flex-col xl:flex-row items-center justify-between gap-6">
+            
+            <div class="flex flex-col lg:flex-row items-center gap-6 w-full xl:w-auto text-center lg:text-left">
+                <!-- LOGO KOLABORASI -->
+                <div class="flex items-center gap-3 bg-slate-100 p-2 rounded-2xl border border-slate-200 shadow-inner shrink-0">
+                    <img src="gambar/logo ptdi.webp" alt="Logo PTDI" class="h-9 w-auto object-contain hover:scale-105 transition-transform" title="PT Dirgantara Indonesia">
+                    <div class="h-7 w-[1px] bg-slate-300"></div>
+                    <img src="gambar/logo bmkg.jpg" alt="Logo BMKG" class="h-9 w-auto object-contain hover:scale-105 transition-transform" title="BMKG">
+                    <div class="h-7 w-[1px] bg-slate-300"></div>
+                    <img src="gambar/logo itb.webp" alt="Logo ITB" class="h-9 w-auto object-contain hover:scale-105 transition-transform" title="Institut Teknologi Bandung">
+                </div>
+
+                <div>
+                    <h1 class="font-heading text-xl lg:text-2xl font-black text-slate-900 uppercase tracking-tight">Upper Air Wind & Temperature Charts</h1>
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-1">
+                        <span class="text-xs font-mono-code text-blue-700 font-extrabold tracking-widest uppercase bg-blue-50 px-3 py-0.5 rounded-md border border-blue-200">BMKG Atmosphere Database</span>
+                        <span class="text-xs font-mono-code text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">● Live Operational</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Running Text & Tombol Export -->
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto no-print">
+                <div class="flex-1 w-full sm:w-[380px] bg-sky-50/80 border-2 border-sky-200 rounded-2xl overflow-hidden py-2 px-3 shadow-inner relative flex items-center">
+                    <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider mr-2 shrink-0 z-10 shadow-sm">Info</span>
+                    <div class="overflow-hidden whitespace-nowrap w-full">
+                        <marquee behavior="scroll" direction="left" scrollamount="5" class="text-xs font-semibold text-slate-700">
+                            ⚡ Analisis upper air charts dan peta angin/suhu standar atmosfer atas bersumber dari database resmi BMKG untuk mendukung operasional penerbangan tinggi.
+                        </marquee>
+                    </div>
+                </div>
+
+                <div class="shrink-0 w-full sm:w-auto flex justify-end">
+                    <button onclick="exportToPDF()" class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-6 py-3 rounded-2xl transition-all flex items-center justify-center gap-2.5 text-xs shadow-lg shadow-blue-500/25 border border-blue-500/30 hover:scale-105 btn-interactive">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>Export PDF Briefing</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Navigasi Bawah Header -->
+        <div class="bg-slate-100/95 backdrop-blur-md border-t border-slate-200 px-6 lg:px-10 py-4 no-print">
+            <div class="max-w-[95rem] mx-auto flex overflow-x-auto gap-4 no-scrollbar items-center py-1">
+                <a href="index.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center text-lg shadow-inner">🏠</span> Beranda
+                </a>
+                <a href="metar.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-amber-100/80 flex items-center justify-center text-lg shadow-sm">🌤️</span> METAR / TAF Reports
+                </a>
+                <a href="satelit.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-100/80 flex items-center justify-center text-lg shadow-sm">🛰️</span> Himawari-9 Satellite
+                </a>
+                <a href="hazard.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-rose-100/80 flex items-center justify-center text-lg shadow-sm">🗺️</span> Upper Air Analysis
+                </a>
+                <a href="wind3000.html" class="nav-item whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-emerald-100/80 flex items-center justify-center text-lg shadow-sm">💨</span> Streamline 3000 Ft
+                </a>
+                <a href="charts.html" class="nav-item active-nav whitespace-nowrap flex items-center gap-3 px-6 py-3.5 rounded-2xl text-xs font-heading tracking-wide">
+                    <span class="w-8 h-8 rounded-xl bg-blue-100/80 flex items-center justify-center text-lg shadow-sm">📈</span> Wind/Temp
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- KONTEN UTAMA UPPER AIR CHARTS -->
+    <main class="flex-1 p-6 lg:p-14 max-w-[95rem] mx-auto w-full space-y-12 mt-56">
+        <div class="bg-white/95 backdrop-blur p-8 lg:p-16 rounded-[2.5rem] border-2 border-slate-200/80 shadow-2xl space-y-8 pb-16">
+            
+            <!-- Header Judul Saja (Tombol Tambah Dipindah ke Bawah) -->
+            <div class="pb-6 border-b-2 border-slate-200">
+                <h2 class="font-heading text-2xl lg:text-4xl font-black text-slate-900 uppercase tracking-tight">Upper Air Wind & Temperature Charts</h2>
+                <p class="text-sm text-slate-600 mt-1">Atur kombinasi level tekanan atmosfer standar dan jam validasi UTC untuk analisis angin dan suhu tingkat tinggi.</p>
+            </div>
+
+            <!-- Builder Rows Container -->
+            <div class="space-y-6">
+                <div id="chart-builder-container" class="space-y-4 no-print"></div>
+
+                <!-- Bagian Bawah: Tombol Tambah Chart di Kiri & Render di Kanan -->
+                <div class="flex flex-col sm:flex-row items-center justify-between pt-2 gap-4 no-print">
+                    <button type="button" id="btn-add-chart" onclick="triggerAddChart()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all border border-indigo-700 flex items-center justify-center gap-2 btn-interactive">
+                        <span>➕ Tambah Chart</span>
+                    </button>
+
+                    <button type="button" id="btn-render-charts" onclick="triggerRenderCharts()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3.5 rounded-2xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all border border-indigo-700 flex items-center justify-center gap-2 btn-interactive">
+                        <span>🔄 Render All Selected Charts</span>
+                    </button>
+                </div>
+
+                <!-- Wadah Output Render Chart -->
+                <div id="rendered-charts-output" class="space-y-12 pt-6 border-t-2 border-slate-200"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- SCRIPT -->
+    <script>
+        const levelOptions = [
+            {val: '850', label: 'FL050 (850 hPa)'},
+            {val: '700', label: 'FL100 (700 hPa)'},
+            {val: '600', label: 'FL140 (600 hPa)'},
+            {val: '500', label: 'FL180 (500 hPa)'},
+            {val: '400', label: 'FL240 (400 hPa)'},
+            {val: '300', label: 'FL300 (300 hPa)'},
+            {val: '250', label: 'FL340 (250 hPa)'},
+            {val: '200', label: 'FL390 (200 hPa)'},
+            {val: '150', label: 'FL450 (150 hPa)'},
+            {val: '100', label: 'FL530 (100 hPa)'}
+        ];
+        const hourOptions = ['00', '06', '12', '18'];
+
+        // Live UTC Clock
+        setInterval(() => {
+            const now = new Date();
+            const utc = now.toUTCString().slice(17, 25) + " UTC";
+            const el = document.getElementById('utc-clock');
+            if(el) el.innerText = utc;
+        }, 1000);
+
+        // Current Date
+        const optionsDate = { day: 'numeric', month: 'long', year: 'numeric' };
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', optionsDate);
+
+        function addChartRow(defaultLevel = '850', defaultHour = '00') {
+            const container = document.getElementById('chart-builder-container');
+            const rowId = 'chart_row_' + Date.now() + Math.random().toString(36).substr(2, 4);
+
+            const rowDiv = document.createElement('div');
+            rowDiv.id = rowId;
+            rowDiv.className = "flex flex-col sm:flex-row items-center gap-4 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-sky-50/70 p-6 rounded-3xl border-2 border-indigo-200 shadow-md";
+
+            let lvlHtml = `<select class="row-level w-full bg-white border-2 border-indigo-200 rounded-2xl p-3.5 text-xs text-slate-900 font-mono-code font-bold focus:outline-none focus:border-indigo-600 shadow-sm">`;
+            levelOptions.forEach(opt => {
+                lvlHtml += `<option value="${opt.val}" ${opt.val === defaultLevel ? 'selected' : ''}>${opt.label}</option>`;
+            });
+            lvlHtml += `</select>`;
+
+            let hrHtml = `<select class="row-hour w-full bg-white border-2 border-indigo-200 rounded-2xl p-3.5 text-xs text-slate-900 font-mono-code font-bold focus:outline-none focus:border-indigo-600 shadow-sm">`;
+            hourOptions.forEach(hr => {
+                hrHtml += `<option value="${hr}" ${hr === defaultHour ? 'selected' : ''}>${hr} UTC</option>`;
+            });
+            hrHtml += `</select>`;
+
+            rowDiv.innerHTML = `
+                <div class="flex-1 w-full">
+                    <span class="text-xs font-extrabold text-indigo-900 uppercase block mb-1.5 font-mono-code tracking-wider">Level Tekanan</span>
+                    ${lvlHtml}
+                </div>
+                <div class="w-full sm:w-48">
+                    <span class="text-xs font-extrabold text-indigo-900 uppercase block mb-1.5 font-mono-code tracking-wider">Jam UTC</span>
+                    ${hrHtml}
+                </div>
+                <div class="flex items-end self-end sm:self-auto">
+                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 border-2 border-rose-300 px-4 py-3.5 rounded-2xl text-xs font-extrabold transition-all mt-6 shadow-sm flex items-center justify-center shrink-0 btn-interactive" title="Hapus">✕</button>
+                </div>
+            `;
+            container.appendChild(rowDiv);
+        }
+
+        function triggerAddChart() {
+            const btn = document.getElementById('btn-add-chart');
+            btn.classList.add('opacity-75', 'scale-95');
+            
+            setTimeout(() => {
+                addChartRow('850', '00');
+                btn.classList.remove('opacity-75', 'scale-95');
+            }, 150);
+        }
+
+        function triggerRenderCharts() {
+            const btn = document.getElementById('btn-render-charts');
+            btn.classList.add('opacity-75', 'scale-95');
+            
+            setTimeout(() => {
+                renderAllCharts();
+                btn.classList.remove('opacity-75', 'scale-95');
+            }, 200);
+        }
+
+        function renderAllCharts() {
+            const levels = document.querySelectorAll('.row-level');
+            const hours = document.querySelectorAll('.row-hour');
+            const outContainer = document.getElementById('rendered-charts-output');
+            outContainer.innerHTML = "";
+
+            const levelNames = {
+                '850': 'FL050 (850 hPa)', '700': 'FL100 (700 hPa)', '600': 'FL140 (600 hPa)',
+                '500': 'FL180 (500 hPa)', '400': 'FL240 (400 hPa)', '300': 'FL300 (300 hPa)',
+                '250': 'FL340 (250 hPa)', '200': 'FL390 (200 hPa)', '150': 'FL450 (150 hPa)',
+                '100': 'FL530 (100 hPa)'
+            };
+
+            for (let i = 0; i < levels.length; i++) {
+                const lvl = levels[i].value;
+                const hr = hours[i].value;
+                const ts = new Date().getTime();
+                const chartUrl = `https://web-aviation.bmkg.go.id/model/windtemp/${lvl}_${hr}.png?t=${ts}`;
+
+                const card = document.createElement('div');
+                card.className = "w-full flex justify-center";
+                card.innerHTML = `
+                    <div class="border-2 border-indigo-300 p-5 lg:p-6 rounded-3xl bg-gradient-to-br from-indigo-50/80 to-blue-50/50 shadow-lg space-y-3 w-full max-w-[850px]">
+                        <div class="flex justify-between items-center pb-2.5 border-b-2 border-indigo-200 gap-6">
+                            <span class="font-mono-code font-extrabold text-xs text-indigo-900 uppercase tracking-wider">Upper Air Wind & Temp - ${levelNames[lvl] || lvl + ' hPa'}</span>
+                            <span class="text-[11px] bg-indigo-600 text-white px-3.5 py-0.5 rounded-xl font-extrabold shadow-sm">VALID: ${hr} UTC</span>
+                        </div>
+                        <div class="w-full flex justify-center items-center overflow-hidden rounded-2xl bg-white border border-indigo-100 shadow-inner p-1.5">
+                            <img src="${chartUrl}" alt="Upper Air Wind & Temp Charts" class="w-full h-auto object-contain rounded-xl shadow-md block mx-auto" onerror="this.onerror=null; this.src='https://wsrv.nl/?url=${encodeURIComponent(chartUrl)}';">
+                        </div>
+                    </div>
+                `;
+                outContainer.appendChild(card);
+            }
+
+            // AUTO-SAVE: Menyimpan data otomatis ke localStorage setiap kali di-render
+            if (outContainer.innerHTML.trim() !== "") {
+                localStorage.setItem('briefing_charts_data', outContainer.innerHTML);
+            }
+        }
+
+        window.onload = function() {
+            addChartRow('850', '00');
+            addChartRow('500', '00');
+            renderAllCharts();
+        };
+
+        function exportToPDF() {
+            // Simpan chart upper air yang sedang dirender oleh user
+            const chartsContainer = document.getElementById('rendered-charts-output');
+            if (chartsContainer && chartsContainer.innerHTML.trim() !== "") {
+                localStorage.setItem('briefing_charts_data', chartsContainer.innerHTML);
+            }
+
+            // Pindah ke halaman rekap master
+            window.location.href = 'print.html';
+        }
+
+        let lastScrollTop = 0;
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                header.classList.add('header-hidden');
+            } else {
+                header.classList.remove('header-hidden');
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
+    </script>
+</body>
+</html>
